@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.0</TargetFramework>
     <PackageId>ConsumeAPI.UI.Simple</PackageId>
-    <PackageVersion>1.0.2-beta</PackageVersion>
+    <PackageVersion>1.0.5-beta</PackageVersion>
     <Authors>Neville Nazerane</Authors>
     <Description>
       Library for linking UI components with ConsumeAPI.Simple
     </Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageReleaseNotes>
-      - Simplified bindible list usage
+      - Added async call backs for all server errors
     </PackageReleaseNotes>
     <PackageTags>ui gui consume api netcore.simple ConsumeAPI.Simple</PackageTags>
     <!--<PackageIconUrl>http://netcoresimple.azurewebsites.net/content/themes/icon.png</PackageIconUrl>-->

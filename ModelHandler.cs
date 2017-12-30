@@ -95,14 +95,14 @@ namespace ConsumeAPI.UI.Simple
         }
 
         public async Task SubmitAsync(Func<TModel, Task<DefaultConsumedResult>> func, Action<string> OnSuccess)
-             => SubmitBase(await func(Model), OnSuccess);
+             => await DuringAsyncSubmit(async () => await SubmitBaseAsync(await func(Model), OnSuccess));
 
         public void Submit(Func<TModel, DefaultConsumedResult> func, Action<string> OnSuccess)
              => SubmitBase(func(Model), OnSuccess);
 
         public async Task SubmitAsync<TResult>(Func<TModel, Task<ConsumedResult<TResult>>> func, Action<TResult> OnSuccess)
         {
-            await DuringAsyncSubmit(async () => SubmitBase(await func(Model), OnSuccess));
+            await DuringAsyncSubmit(async () => await SubmitBaseAsync(await func(Model), OnSuccess));
         }
 
         public void Submit<TResult>(Func<TModel, ConsumedResult<TResult>> func, Action<TResult> OnSuccess)
@@ -145,6 +145,48 @@ namespace ConsumeAPI.UI.Simple
             }
         }
 
+        async Task SubmitBaseAsync<TResult>(ConsumedResult<TResult> result, Action<TResult> OnSuccess)
+        {
+            foreach (var clear in ClearErrors)
+                clear();
+            switch (result.StatusCode)
+            {
+                case HttpStatusCode.OK:
+                    OnSuccess(result.Data);
+                    break;
+                case HttpStatusCode.Unauthorized:
+                    OnUnauthorized(result.TextResponse);
+                    await OnUnauthorizedAsync(result.TextResponse);
+                    break;
+                case HttpStatusCode.InternalServerError:
+                    OnInternalServerError(result.TextResponse);
+                    await OnInternalServerErrorAsync(result.TextResponse);
+                    break;
+                case HttpStatusCode.Forbidden:
+                    OnForbidden(result.TextResponse);
+                    await OnForbiddenAsync(result.TextResponse);
+                    break;
+                case HttpStatusCode.NotFound:
+                    OnNotFound(result.TextResponse);
+                    await OnNotFoundAsync(result.TextResponse);
+                    break;
+                case HttpStatusCode.BadGateway:
+                    OnBadGateway(result.TextResponse);
+                    await OnBadGatewayAsync(result.TextResponse);
+                    break;
+                case HttpStatusCode.BadRequest:
+                    foreach (var error in result.Errors)
+                    {
+                        if (ErrorGenerators.ContainsKey(error.Key))
+                        {
+                            var gen = ErrorGenerators[error.Key];
+                            gen(error.Errors);
+                        }
+                    }
+                    break;
+            }
+        }
+
         protected virtual void OnUnauthorized(string response)
         {
 
@@ -166,6 +208,31 @@ namespace ConsumeAPI.UI.Simple
         }
 
         protected virtual void OnBadGateway(string response)
+        {
+
+        }
+
+        protected virtual async Task OnUnauthorizedAsync(string response)
+        {
+
+        }
+
+        protected virtual async Task OnForbiddenAsync(string response)
+        {
+
+        }
+
+        protected virtual async Task OnInternalServerErrorAsync(string response)
+        {
+
+        }
+
+        protected virtual async Task OnNotFoundAsync(string response)
+        {
+
+        }
+
+        protected virtual async Task OnBadGatewayAsync(string response)
         {
 
         }
